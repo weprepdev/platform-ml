@@ -185,7 +185,8 @@ def analyze_video(video_path):
                 text = top + ' + ' + label
                 cv2.putText(frame, text, (x, y+(h+50)), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 4, cv2.LINE_AA)
 
-            cv2.imshow('Video', frame)
+            # uncomment this line if you want to view the analysis in a window
+            # cv2.imshow('Video', frame)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
