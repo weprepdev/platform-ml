@@ -2,10 +2,17 @@ from scipy.io import wavfile
 from pitch_detectors import algorithms
 import myspsolution as mysp
 import textgrid
+import boto3
 
+s3 = boto3.client("s3")
 
 def analyze_audio(p, c):
-    soundfile = p + ".wav"
+    key = f"{c}{p}"
+    audio_file_path = "/tmp/audio_file.wav"
+    s3.download_file("weprep-user-audios", key, audio_file_path)
+
+    # soundfile = p + ".wav"
+    soundfile = p
 
     fs, a = wavfile.read(soundfile)
     pitch = algorithms.Crepe(a, fs)
@@ -47,8 +54,6 @@ def analyze_audio(p, c):
     result.update(gen_res)
     result.update(art)
     result.update(pit)
-    result.update(vol)
-
-
+    # result.update(vol)
 
     return result
