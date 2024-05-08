@@ -41,6 +41,7 @@ def analyze_video(video_path):
     scale_factor = 1.1
     min_neighbours = 5
     Engage = list()
+    EmotionOrder = list()
 
     video_capture = cv2.VideoCapture(video_path)
 
@@ -135,18 +136,25 @@ def analyze_video(video_path):
                 #increase cnt
                 if top == 'Anger':
                     cntAnger += 1
+                    EmotionOrder.append("Anger")
                 if top == 'Disgust':
                     cntDisgust += 1
+                    EmotionOrder.append("Disgust")
                 if top == 'Fear':
                     cntFear += 1
+                    EmotionOrder.append("Fear")
                 if top == 'Happiness':
                     cntHappiness += 1
+                    EmotionOrder.append("Happiness")
                 if top == 'Sadness':
                     cntSadness += 1
+                    EmotionOrder.append("Sadness")
                 if top == 'Surprise':
                     cntSurprise += 1
+                    EmotionOrder.append("Surprise")
                 if top == 'Neutral':
                     cntNeutral += 1
+                    EmotionOrder.append("Neutral")
 
                 #increse time
                 cntTime += 1
@@ -166,10 +174,29 @@ def analyze_video(video_path):
     #Engagement Level Graph
     time = np.arange(cntTime + 1)
     engm = np.asarray(Engage)
-    result = {}
+    engagement = {}
+    emotionOrders = {}
 
     for tim, eng in zip(time, engm):
-        result[int(tim)] = str(eng)
+        engagement[int(tim)] = str(eng)
+
+    for tim, emo_ord in zip(time, EmotionOrder):
+        emotionOrders[int(tim)] = emo_ord
+
+    labels = ['Anger', 'Disgust', 'Fear', 'Happiness', 'Sadness', 'Surprise', 'Neutral']
+    values = [cntAnger, cntDisgust, cntFear, cntHappiness, cntSadness, cntSurprise, cntNeutral]
+    emotions = {}
+    for lab, val in zip(labels, values):
+        emotions[lab] = str(val)
+
+    new_eng = {"engagement": engagement}
+    new_emo_ord = {"emotionOrder": emotionOrders}
+    new_emo = {"emotions": emotions}
+
+    result = {}
+    result.update(new_eng)
+    result.update(new_emo_ord)
+    result.update(new_emo)
 
     # When everything is done, release the capture
     video_capture.release()
