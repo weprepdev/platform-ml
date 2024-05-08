@@ -53,6 +53,13 @@ def analyze_video(video_path):
     cntSadness = 0
     cntSurprise = 0
     cntHappiness = 0
+    emotion_orders = {}
+
+    fps = video_capture.get(cv2.CAP_PROP_FPS)
+
+    subsampling_rate = int(round(fps/6))
+
+    frame_count = 0
 
     while True:
         if not video_capture.isOpened():
@@ -61,6 +68,12 @@ def analyze_video(video_path):
             ret, frame = video_capture.read()
             if not ret:
                 break
+
+            frame_count += 1
+
+            if frame_count % subsampling_rate != 0:
+                continue
+
             frame = imutils.resize(frame, width=frame_w)
             gray_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
@@ -136,25 +149,29 @@ def analyze_video(video_path):
                 #increase cnt
                 if top == 'Anger':
                     cntAnger += 1
-                    EmotionOrder.append("Anger")
                 if top == 'Disgust':
                     cntDisgust += 1
-                    EmotionOrder.append("Disgust")
                 if top == 'Fear':
                     cntFear += 1
-                    EmotionOrder.append("Fear")
                 if top == 'Happiness':
                     cntHappiness += 1
-                    EmotionOrder.append("Happiness")
                 if top == 'Sadness':
                     cntSadness += 1
-                    EmotionOrder.append("Sadness")
                 if top == 'Surprise':
                     cntSurprise += 1
-                    EmotionOrder.append("Surprise")
                 if top == 'Neutral':
                     cntNeutral += 1
-                    EmotionOrder.append("Neutral")
+
+                prediction_list = prediction[0].tolist()
+                emotion_orders[cntTime] = {
+                    "Anger": prediction_list[0],
+                    "Disgust": prediction_list[1],
+                    "Fear": prediction_list[2],
+                    "Happiness": prediction_list[3],
+                    "Sadness": prediction_list[4],
+                    "Surprise": prediction_list[5],
+                    "Neutral": prediction_list[6]
+                }
 
                 #increse time
                 cntTime += 1
@@ -168,6 +185,8 @@ def analyze_video(video_path):
                 text = top + ' + ' + label
                 cv2.putText(frame, text, (x, y+(h+50)), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 4, cv2.LINE_AA)
 
+            cv2.imshow('Video', frame)
+
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
@@ -175,13 +194,9 @@ def analyze_video(video_path):
     time = np.arange(cntTime + 1)
     engm = np.asarray(Engage)
     engagement = {}
-    emotionOrders = {}
 
     for tim, eng in zip(time, engm):
         engagement[int(tim)] = str(eng)
-
-    for tim, emo_ord in zip(time, EmotionOrder):
-        emotionOrders[int(tim)] = emo_ord
 
     labels = ['Anger', 'Disgust', 'Fear', 'Happiness', 'Sadness', 'Surprise', 'Neutral']
     values = [cntAnger, cntDisgust, cntFear, cntHappiness, cntSadness, cntSurprise, cntNeutral]
@@ -189,8 +204,11 @@ def analyze_video(video_path):
     for lab, val in zip(labels, values):
         emotions[lab] = str(val)
 
+    new_emo_ord = {"emotion_orders": emotion_orders}
+
+    print(new_emo_ord)
+
     new_eng = {"engagement": engagement}
-    new_emo_ord = {"emotionOrder": emotionOrders}
     new_emo = {"emotions": emotions}
 
     result = {}
