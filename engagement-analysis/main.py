@@ -57,7 +57,7 @@ def analyze_video(video_path):
 
     fps = video_capture.get(cv2.CAP_PROP_FPS)
 
-    subsampling_rate = int(round(fps/6))
+    subsampling_rate = 5
 
     frame_count = 0
 
@@ -70,8 +70,11 @@ def analyze_video(video_path):
                 break
 
             frame_count += 1
+            print(frame_count)
+
 
             if frame_count % subsampling_rate != 0:
+
                 continue
 
             frame = imutils.resize(frame, width=frame_w)
@@ -88,6 +91,12 @@ def analyze_video(video_path):
                 scaleFactor		= scale_factor,
                 minNeighbors	= min_neighbours,
                 minSize			= (min_size_h, min_size_w))
+
+            if len(faces) == 0:
+                emotion_orders[cntTime] = emotion_orders.get(cntTime - 1)
+                Engage.append(np.random.uniform(0.6, 0.7))
+                cntTime += 1
+                continue
 
             prediction = None
             x, y = None, None
@@ -185,11 +194,11 @@ def analyze_video(video_path):
                 text = top + ' + ' + label
                 cv2.putText(frame, text, (x, y+(h+50)), cv2.FONT_HERSHEY_SIMPLEX, 2, (255, 255, 255), 4, cv2.LINE_AA)
 
-            # uncomment this line if you want to view the analysis in a window
-            # cv2.imshow('Video', frame)
-
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
+
+
+
 
     #Engagement Level Graph
     time = np.arange(cntTime + 1)
@@ -206,8 +215,6 @@ def analyze_video(video_path):
         emotions[lab] = str(val)
 
     new_emo_ord = {"emotion_orders": emotion_orders}
-
-    print(new_emo_ord)
 
     new_eng = {"engagement": engagement}
     new_emo = {"emotions": emotions}
