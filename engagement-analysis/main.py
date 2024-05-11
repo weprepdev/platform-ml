@@ -93,8 +93,20 @@ def analyze_video(video_path):
                 minSize			= (min_size_h, min_size_w))
 
             if len(faces) == 0:
-                emotion_orders[cntTime] = emotion_orders.get(cntTime - 1)
-                Engage.append(np.random.uniform(0.6, 0.7))
+                if cntTime == 0:
+                    emotion_orders[cntTime] = {
+                        "Anger": 0.0833333,
+                        "Disgust": 0.0833333,
+                        "Fear": 0.0833333,
+                        "Happiness": 0.0833333,
+                        "Sadness": 0.0833333,
+                        "Surprise": 0.0833333,
+                        "Neutral":0.5
+                    }
+                    Engage.append(np.random.uniform(0.0, 0.2))
+                else:
+                    emotion_orders[cntTime] = emotion_orders.get(cntTime - 1)
+                    Engage.append(Engage[cntTime - 1] * 0.3)
                 cntTime += 1
                 continue
 
